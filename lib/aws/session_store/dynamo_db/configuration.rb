@@ -10,7 +10,7 @@ module Aws::SessionStore::DynamoDB
   # The Configuration object can load default values from your environment. An example
   # of setting and environment variable is below:
   #
-  #   export DYNAMO_DB_SESSION_TABLE_NAME='Sessions'
+  #   export DYNAMODB_SESSIONS_TABLE_NAME='Sessions'
   #
   # == Handling Errors
   # There are two configurable options for error handling: :raise_errors and :error_handler.
@@ -43,6 +43,7 @@ module Aws::SessionStore::DynamoDB
     DEFAULTS = {
       :table_name => "sessions",
       :table_key => "session_id",
+      :storage_format => "marshal",
       :consistent_read => true,
       :read_capacity => 10,
       :write_capacity => 5,
@@ -63,6 +64,10 @@ module Aws::SessionStore::DynamoDB
 
     # @return [String] Session table hash key name.
     attr_reader :table_key
+
+    # @return [String] Format data is stored in before encoded and written to
+    #   the database.
+    attr_reader :storage_format
 
     # @return [true] If a strongly consistent read is used
     # @return [false] If an eventually consistent read is used.
@@ -134,6 +139,8 @@ module Aws::SessionStore::DynamoDB
     #   table.
     # @option options [String] :table_key ("id") The hash key of the sesison
     #   table.
+    # @option options [String] :storage_format ("marshal") Format data is stored
+    #   in before encoded and written to the database.
     # @option options [Boolean] :consistent_read (true) If true, a strongly
     #   consistent read is used. If false, an eventually consistent read is
     #   used.
@@ -219,7 +226,7 @@ module Aws::SessionStore::DynamoDB
     # @return [Hash] Environment options that are useful for Session Handler.
     def env_options
       default_options.keys.inject({}) do |opts, opt_name|
-        env_var = "DYNAMO_DB_SESSION_#{opt_name.to_s.upcase}"
+        env_var = "DYNAMODB_SESSIONS_#{opt_name.to_s.upcase}"
         opts[opt_name] = ENV[env_var] if ENV.key?(env_var)
         opts
       end
@@ -239,12 +246,18 @@ module Aws::SessionStore::DynamoDB
     def load_from_file(file_path)
       require "erb"
       opts = YAML.load(ERB.new(File.read(file_path)).result) || {}
+      opts = opts[Rails.env] if rails_defined && opts.key?(Rails.env)
       symbolize_keys(opts)
+    end
+
+    # @return [Boolean] Necessary Rails variables defined.
+    def rails_defined
+      defined?(Rails) && defined?(Rails.root) && defined?(Rails.env)
     end
 
     # @return [String] Configuration path found in environment or YAML file.
     def config_file_path(options)
-      options[:config_file] || ENV["DYNAMO_DB_SESSION_CONFIG_FILE"]
+      options[:config_file] || ENV["DYNAMODB_SESSIONS_CONFIG_FILE"]
     end
 
     # Set accessible attributes after merged options.

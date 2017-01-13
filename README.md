@@ -57,11 +57,11 @@ The full set of options along with defaults can be found in the
 Certain configuration options can be loaded from the environment. These
 options must be specified in the following format:
 
-    DYNAMO_DB_SESSION_NAME-OF-CONFIGURATION-OPTION
+    DYNAMODB_SESSIONS_NAME-OF-CONFIGURATION-OPTION
 
 The example below would be a valid way to set the session table name:
 
-    export DYNAMO_DB_SESSION_TABLE_NAME='sessions'
+    export DYNAMODB_SESSIONS_TABLE_NAME='sessions'
 
 ### Garbage Collection
 
