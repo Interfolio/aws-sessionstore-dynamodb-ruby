@@ -32,6 +32,7 @@ module Aws::SessionStore::DynamoDB::Locking
 
     # @return [String] Session data.
     def extract_data(env, result = nil)
+      return nil unless result
       env['rack.initial_data'] = result[:item]["data"] if result[:item]
       unpack_data(result[:item]["data"]) if result[:item]
     end
