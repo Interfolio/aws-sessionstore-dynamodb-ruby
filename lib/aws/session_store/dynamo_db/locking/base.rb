@@ -119,7 +119,7 @@ module Aws::SessionStore::DynamoDB::Locking
     def attr_updts(env, session, add_attrs = {})
       data = data_unchanged?(env, session) ? {} : data_attr(session)
       {
-        :attribute_updates => merge_all(updated_attr, data, add_attrs),
+        :attribute_updates => merge_all(updated_attr, expires_attr, data, add_attrs),
         :return_values => "UPDATED_NEW"
       }
     end
@@ -127,6 +127,10 @@ module Aws::SessionStore::DynamoDB::Locking
     # Update client with current time attribute.
     def updated_at
       { :value => "#{(Time.now).to_f}", :action  => "PUT" }
+    end
+
+    def expires_at
+      { :value => "#{(Time.now + config.max_stale).to_f}", :action => "PUT" }
     end
 
     # Attribute for creation of session.
@@ -139,6 +143,11 @@ module Aws::SessionStore::DynamoDB::Locking
       {
         "updated_at" => updated_at
       }
+    end
+
+    # TTL Attribute
+    def expires_attr
+      { "expires_at" => expires_at }
     end
 
     def data_attr(session)
