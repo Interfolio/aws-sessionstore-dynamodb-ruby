@@ -1,0 +1,9 @@
+.codebuild
+.githooks
+.git
+.idea
+.vscode
+.ruby-*
+.bundle
+vendor/bundle
+**/*.local.yml
