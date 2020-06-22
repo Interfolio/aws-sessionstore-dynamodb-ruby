@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -e
+
+for fn in $(git diff --cached --name-only --diff-filter=AM | grep '^\.codebuild/.\+\.sh$'); do
+  gpg --yes --output ${fn}.sig --detach-sig ${fn}
+  git add ${fn}.sig
+done
