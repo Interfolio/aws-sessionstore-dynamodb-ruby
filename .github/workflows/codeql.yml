@@ -1,0 +1,19 @@
+name: "CodeQL Advanced"
+
+on:
+  push:
+    branches: [ "master" ]
+    tags: ['*']
+  pull_request:
+    branches: [ "master" ]
+  schedule:
+    - cron: '46 3 * * 1'
+
+jobs:
+  code-scanning:
+    uses: ./.github/workflows/code-scanning.yml
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
